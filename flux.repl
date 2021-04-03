@@ -1,0 +1,77 @@
+(begin-tx)
+(env-data
+  { "trunk": ["trunk-key"]
+  , 'ns: "free"
+  , 'upgrade: false
+  , "alice": ["alice-key"]
+  , "bob": ["bob-key"]
+  })
+(load "fungible-v2.pact")
+(load "fungible-util.pact")
+(load "fungible.repl")
+(commit-tx)
+
+(begin-tx)
+(env-data
+  { "trunk": ["trunk-key"]
+  , 'ns: "free"
+  , 'upgrade: false
+  , "alice": ["alice-key"]
+  , "bob": ["bob-key"]
+  })
+(load "flux.pact")
+(commit-tx)
+
+;; test upgradeability
+(begin-tx)
+(env-data
+  { 'trunk: ["trunk-key"]
+  , 'ns: "free"
+  , 'upgrade: true
+  , "alice": ["alice-key"]
+  , "bob": ["bob-key"]
+  })
+(load "flux.pact")
+(rollback-tx)
+
+;;
+;;test fund
+;;
+(begin-tx)
+(use testflux);
+(testflux.create-account "trunk" (read-keyset 'trunk))
+(commit-tx)
+;;fund fails without goveranance key
+(expect-failure
+  "Governance keyset failure"
+  "Keyset failure (keys-all): 'trunk"
+  (testflux.fund 'trunk 10.0))
+
+;;fund succeeds with goveranance key
+(begin-tx)
+(env-sigs [
+  { 'key: "trunk"
+  , 'caps:
+    []
+  }])
+(expect
+  "Fund succeeds"
+  "Write succeeded"
+  (testflux.fund 'trunk 10000.0))
+
+(expect
+  "bob account is credited"
+  10000.0
+  (testflux.get-balance 'trunk))
+(rollback-tx)
+
+(begin-tx)
+(use fungible-v2-test)
+; (env-data
+;   { "trunk": ["trunk-key"]
+;   , 'ns: "free"
+;   , 'upgrade: false
+;   , "alice": ["alice-key"]
+;   , "bob": ["bob-key"]
+;   })
+(fungible-v2-test.suite testflux fungible-test-helper-default "")
