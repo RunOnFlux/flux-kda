@@ -1,7 +1,7 @@
 (define-keyset 'fluxteam (read-keyset 'fluxteam))
 
 (namespace (read-msg 'ns))
-(module testflux GOVERNANCE
+(module flux GOVERNANCE
 
   (implements fungible-v2)
   (use fungible-util)
