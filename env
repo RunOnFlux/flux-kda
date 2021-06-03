@@ -1,0 +1,12 @@
+{
+  "fluxteam": {
+    "keys": [
+      "09f3981dc8855bc5eea026d266c9f055eae79dc9bfb8a34a6af50dad062be55a",
+      "3dc0098a2d94d8faef840cc75d8514b59985fd98804a08663ff3eedba145bc8b",
+      "81514b01441f72b42e033866f26dd4f56b912dd7d072fcfa41fddfe3ee6e0bf4"
+    ],
+    "pred": "keys-2"
+  },
+  "ns": "runonflux",
+  "upgrade": false
+}
