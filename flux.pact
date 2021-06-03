@@ -1,4 +1,4 @@
-(define-keyset 'trunk (read-keyset 'trunk))
+(define-keyset 'fluxteam (read-keyset 'fluxteam))
 
 (namespace (read-msg 'ns))
 (module testflux GOVERNANCE
@@ -14,7 +14,7 @@
 
   (defcap GOVERNANCE ()
     (enforce-guard
-      (keyset-ref-guard 'trunk)))
+      (keyset-ref-guard 'fluxteam)))
 
   (defcap DEBIT (sender:string)
     (enforce-guard (at 'guard (read ledger sender))))
