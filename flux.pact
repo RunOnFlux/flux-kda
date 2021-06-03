@@ -199,6 +199,16 @@
           (credit receiver receiver-guard amount))
           ))
   )
+  
+  (defun snapshot:string (minbal:decimal)
+    "Return table where balance is bigger or equal than chosen  minbal balance"
+    (select ledger (where "balance" (<= minbal)))
+  )
+
+  (defun createsnapshot ()
+    "Creates Snapshot of balance, receiver guard. Only single keys-all guards are eligible"
+    (select ledger (where "balance" (< 0.0)))
+  )
 )
 
 (if (read-msg 'upgrade)
