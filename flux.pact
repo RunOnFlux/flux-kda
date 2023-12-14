@@ -53,6 +53,7 @@
       guard:guard
     )
     (enforce-valid-account account)
+    (enforce-reserved account guard)
     (insert ledger account
       { "balance" : 0.0
       , "guard"   : guard
@@ -140,17 +141,42 @@
 
     (require-capability (CREDIT account))
     (with-default-read ledger account
-      { "balance" : 0.0, "guard" : guard }
+      { "balance" : -1.0, "guard" : guard }
       { "balance" := balance, "guard" := retg }
       ; we don't want to overwrite an existing guard with the user-supplied one
       (enforce (= retg guard)
         "account guards do not match")
 
-      (write ledger account
-        { "balance" : (+ balance amount)
-        , "guard"   : retg
-        })
+      (let ((is-new
+             (if (= balance -1.0)
+                 (enforce-reserved account guard)
+               false)))
+
+        (write ledger account
+          { "balance" : (if is-new amount (+ balance amount))
+          , "guard"   : retg
+          }))
       ))
+
+  (defun check-reserved:string (account:string)
+    " Checks ACCOUNT for reserved name and returns type if \
+    \ found or empty string. Reserved names start with a \
+    \ single char and colon, e.g. 'c:foo', which would return 'c' as type."
+    (let ((pfx (take 2 account)))
+      (if (= ":" (take -1 pfx)) (take 1 pfx) "")))
+
+  (defun enforce-reserved:bool (account:string guard:guard)
+    @doc "Enforce reserved account name protocols."
+    (let ((r (check-reserved account)))
+      (if (= "" r) true
+        (if (= "k" r)
+          (enforce
+            (= (format "{}" [guard])
+               (format "KeySet {keys: [{}],pred: keys-all}"
+                       [(drop 2 account)]))
+            "Single-key account protocol violation")
+          (enforce false
+            (format "Unrecognized reserved protocol: {}" [r]))))))
 
   (defschema crosschain-schema
     @doc "Schema for yielded value in cross-chain transfers"
